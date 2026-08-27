@@ -1,0 +1,167 @@
+/*
+ * Printing. The card is laid out at true ID-1 size rather than scaled to the
+ * page, because a browser's "shrink to fit" makes the column emoji illegible.
+ */
+@media print {
+  @page {
+    size: auto;
+    margin: 12mm;
+  }
+
+  html.dark body,
+  body {
+    background: #fff;
+    color: #000;
+  }
+
+  /*
+   * Cards are inline-blocks: the one multi-column arrangement print engines all
+   * paginate the same way. Grid and flex fragment inconsistently across a page
+   * break, and a card split down the middle is waste paper.
+   *
+   * `font-size: 0` kills the whitespace *between* the inline-blocks, which
+   * would otherwise widen the gutter and could push a column onto its own row.
+   */
+  #sheet {
+    font-size: 0;
+  }
+
+  /* The stack is a screen idea; on paper the whole run prints flat. */
+  .stack-slot,
+  .stack-slot--peek {
+    position: static;
+    height: auto;
+    overflow: visible;
+  }
+
+  /* Left absolute, every card would lift out of the sheet and pile up in one
+     corner. The inline z-index goes inert once nothing is positioned. */
+  .stack-slot--above > .card,
+  .stack-slot--below > .card {
+    position: static;
+  }
+
+  .stack-slot + .stack-slot {
+    margin-top: 0;
+  }
+
+  /*
+   * The gutter is for the scissors. Against 12mm margins, A4 leaves
+   * 186 x 273mm:
+   *   across   2 x 85.6mm + 1 gutter  = 179.2mm  (a third needs 268.8mm)
+   *   down     4 x 53.98mm + gutters  = 231.9mm  (a fifth needs 289.9mm)
+   * So a page holds eight, which is where `@counts` comes from. US Letter is
+   * 192 x 255mm inside the same margins and works out the same.
+   */
+  .card-slot {
+    display: inline-block;
+    vertical-align: top;
+    width: 85.6mm;
+    margin: 0 4mm 4mm 0;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /*
+   * ID-1, the credit-card rectangle. `min-height` and never `height`: a fixed
+   * height draws the border at 54mm and lets the grid run on underneath it.
+   *
+   * The height budget, against 53.98mm:
+   *   padding            2 x 3mm    =  6.0mm
+   *   column emoji row   2.8 + 0.4  =  3.2mm
+   *   8 grid rows        8 x 5.0mm  = 40.0mm
+   *   card id line       2.2 + 1.2  =  3.4mm
+   *                                   ------
+   *                                    52.6mm, ~1.4mm slack for font metrics
+   */
+  .card {
+    width: 100%;
+    height: auto;
+    min-height: 53.98mm;
+    padding: 3mm;
+    border: 0.3mm solid #000;
+    border-radius: 3mm;
+    box-sizing: border-box;
+    overflow: visible;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    /* Undoes the sheet's `font-size: 0`. */
+    font-size: 3.2mm;
+  }
+
+  /* No `height: 100%`: the table would take the whole content box and push the
+     id line past the border. */
+  .card table {
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  /*
+   * The number the whole grid's spacing hangs off. Under `table-layout: fixed`
+   * a width on a `<th>` is silently ignored, so this has to be on the `<col>`.
+   *
+   *   content width   85.6 - 0.6 border - 6 padding  =  79.00mm
+   *   label column                                       6.00mm
+   *   21 data columns          73 / 21                =   3.48mm each
+   *
+   * 6mm rather than 5mm to clear the accent stripe: every 1mm moved here costs
+   * each data column 0.048mm.
+   */
+  .card colgroup .label-column {
+    width: 6mm;
+  }
+
+  .card-id-line {
+    margin-top: 1.2mm;
+    font-size: 2.2mm;
+    line-height: 1;
+    text-align: center;
+    color: #555;
+  }
+
+  /*
+   * Sized against the column *width*, not the height budget, and against the
+   * gap rather than the glyph: colour emoji fill their em box, so ink-to-ink
+   * spacing is column width less font size. 2.8mm in 3.48mm leaves 0.68mm; at
+   * 3mm the 0.52mm gap reads as a continuous band rather than 21 objects.
+   */
+  .card th[scope="col"] {
+    font-size: 2.8mm;
+    padding: 0 0 0.4mm 0;
+    line-height: 1;
+  }
+
+  /*
+   * The animals get a row's height but not its width: the stripe and the
+   * padding both come out of the 6mm label column:
+   *   6.0 less 0.8 stripe less 0.8 padding = 4.4mm for a 3.4mm glyph.
+   * Oversize here and the glyph, being centred, prints over its own stripe.
+   */
+  .card th[scope="row"] {
+    font-size: 3.4mm;
+    padding: 0 0.8mm 0 0;
+    line-height: 1;
+    border-left-width: 0.8mm;
+  }
+
+  /* 3.2mm glyphs on a 5mm line. The leading is what makes a row scannable, so
+     it is the last thing to give up. */
+  .card td {
+    font-size: 3.2mm;
+    padding: 0;
+    line-height: 1.56;
+  }
+
+  /* Flat opaque tints, never alpha: a printer compositing a translucent wash is
+     one more thing to go wrong. */
+  .card .row-band {
+    background-color: var(--row-tint);
+  }
+
+  /* Browsers drop background colours in print by default, and the tint is the
+     only thing separating the bands. */
+  .card * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

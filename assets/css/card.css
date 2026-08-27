@@ -1,0 +1,71 @@
+/* The card on screen. Paper is in print.css, the multi-card stack in stack.css. */
+
+/* Each row carries its emoji's colour as `--row-tint`. */
+.row-band {
+  background-color: var(--row-tint);
+}
+
+/* The light tints vanish on a dark background, so mix the band from the
+   saturated accent instead. */
+.dark .row-band {
+  background-color: color-mix(in srgb, var(--row-accent) 26%, transparent);
+}
+
+/* In monochrome every accent is black, so the rule above would give eight
+   identical bands. Lift one row in two instead, the same rows `row_style/3`
+   greys, which is what to keep in step if either moves. */
+.dark .card--mono .row-band {
+  background-color: transparent;
+}
+
+.dark .card--mono tbody tr:nth-child(even) {
+  background-color: rgb(255 255 255 / 0.14);
+}
+
+/*
+ * Naming a colour emoji font first is what actually gets colour glyphs.
+ * `Emoji_Presentation=Yes` settles the default only where the renderer has a
+ * free choice, and font fallback runs first: the grid is `font-mono`, and
+ * Menlo carries black-and-white glyphs for `⌛`, `⭐` and `⚡`.
+ *
+ * All system fonts, so nothing here needs a request the CSP would refuse.
+ */
+[role="img"] {
+  font-family:
+    "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla",
+    "EmojiOne Color", "Android Emoji", sans-serif;
+}
+
+/* The phone card: the same grid transposed, bands following the animals onto
+   the columns. A `<col>` background paints under every cell in its column,
+   which is one rule rather than 168 inline styles. */
+.col-band {
+  background-color: var(--row-tint);
+}
+
+.dark .col-band {
+  background-color: color-mix(in srgb, var(--row-accent) 26%, transparent);
+}
+
+/*
+ * A `<col>` background paints the header cells too, so the tint ran up behind
+ * the emoji naming it. An opaque header cuts it off: cell backgrounds paint
+ * above column backgrounds. card_image.js fills each band the same way.
+ */
+.phone-card thead th {
+  @apply bg-white;
+}
+
+.dark .phone-card thead th {
+  @apply bg-zinc-900;
+}
+
+/* Fixed, so the 8 data columns stay equal. Under `auto` a wide glyph steals
+   width from its neighbours. */
+.phone-card table {
+  table-layout: fixed;
+}
+
+.phone-card .phone-label-column {
+  width: 1.75rem;
+}

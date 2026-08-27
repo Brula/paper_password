@@ -1,0 +1,8 @@
+/* The page itself, in both themes. `dark` is toggled on the root element. */
+
+body {
+  @apply bg-white text-zinc-900 transition-colors duration-300;
+}
+.dark body {
+  @apply bg-zinc-900 text-zinc-100;
+}

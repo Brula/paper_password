@@ -1,0 +1,63 @@
+/*
+ * The stack: every card of a run is on screen, the one on top whole and the
+ * rest clipped to a slice of their edge.
+ *
+ * Clipping rather than positioning is what makes it safe: `overflow: hidden`
+ * on a fixed-height slot needs to know nothing about how tall a card is, so the
+ * same rule holds for the 8-row wallet card and the 21-row phone one.
+ *
+ * Screen only; print.css takes it all back apart.
+ */
+.stack-slot {
+  /*
+   * The one knob. It has to clear the card's own padding or the slice is blank
+   * card, and stay under the gap between slots or `Stack.depth/3`'s ties start
+   * mattering. Any larger and the last grid row shows under the card in front.
+   */
+  --peek: 2.5rem;
+
+  position: relative;
+}
+
+@media (min-width: 640px) {
+  .stack-slot {
+    --peek: 3.25rem;
+  }
+}
+
+.stack-slot--peek {
+  height: var(--peek);
+  overflow: hidden;
+}
+
+/*
+ * Which end of the card each slice shows. A card above the selected one is in
+ * front of it, so its top edge shows; a card below is behind, so its bottom
+ * does, which also gives the bottom slices the id line for free.
+ */
+.stack-slot--above > .card,
+.stack-slot--below > .card {
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+
+.stack-slot--above > .card {
+  top: 0;
+}
+
+.stack-slot--below > .card {
+  bottom: 0;
+}
+
+/* Between slots rather than on them, so the stack still starts where the stage
+   does. */
+.stack-slot + .stack-slot {
+  margin-top: -0.75rem;
+}
+
+/* The clipped cards carry no click handler, so the cover is what makes a slice
+   a target. */
+.stack-cover {
+  cursor: pointer;
+}

@@ -1,0 +1,16 @@
+/*
+ * The entry point, and nothing else. Tailwind's layers first, then this app's
+ * own rules in the order they have to land in the bundle.
+ *
+ * The Tailwind CLI inlines these relative imports, but only while they are the
+ * first thing in the file: an `@import` sitting after a rule is dropped without
+ * a word, taking the whole file with it. So this one stays imports.
+ */
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+@import "./base.css";
+@import "./card.css";
+@import "./stack.css";
+@import "./print.css";
