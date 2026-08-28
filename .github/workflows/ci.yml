@@ -1,0 +1,18 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    # Same image scripts/release builds with, so the gate and the artifact
+    # never disagree about the toolchain.
+    container: hexpm/elixir:1.19.5-erlang-28.5.0.5-debian-bookworm-20260824
+    steps:
+      - uses: actions/checkout@v4
+      - run: apt-get update -qq && apt-get install -y -qq make
+      - run: mix local.hex --force && mix local.rebar --force
+      - run: mix deps.get
+      - run: make check
